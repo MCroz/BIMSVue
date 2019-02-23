@@ -7,7 +7,7 @@
             <v-card class="elevation-1 pa-3">
               <v-card-text>
                 <div class="layout column align-center">
-                  <img src="../assets/logo.png" width="120" height="120">
+                  <img src="../assets/bims-logo.png" width="120" height="120">
                   <h1 class="flex my-4 primary--text">BIMS</h1>
                 </div>                
                 <v-form>
@@ -22,6 +22,10 @@
               </v-card-actions>
             </v-card>
           </v-flex>
+
+          <BimsAlert ref="BimsAlert"></BimsAlert>
+          <Preloader ref="Preloader"></Preloader>
+          <ForgotPassword ref="ForgotPassword"></ForgotPassword>
         </v-layout>
       </v-container>
     </v-content>
@@ -29,32 +33,63 @@
 </template>
 
 <script>
+import Backbone from 'backbone'
+//const Backbone = require('backbone');
 import Endpoint from '../Services/Endpoints'
-import axios from 'axios'
+import BimsAlert from '../components/BimsAlert.vue'
+import Preloader from '../components/Preloader.vue'
+import ForgotPassword from './ForgotPassword.vue'
 
 export default {
   data: () => ({
+    dialog: false,
     loading: false,
     model: {
       username: '',
       password: ''
     }
   }),
+  components: { 
+    'BimsAlert': BimsAlert,
+    'Preloader': Preloader,
+    'ForgotPassword' : ForgotPassword
+  },
   methods: {
     login: function() {
         //this.loading = true;
         //Run API
+        var self = this;
         let username = this.model.username;
         let password = this.model.password;
         let userSet = {
             username: username,
             password: password
         }
-        return false;
-        this.$router.push('/main/dashboard');
+        // Endpoint.login(userSet);
+        let aj = Backbone.Model.extend({
+            url: "http://localhost:6513/api/Login/InitialLogin"
+        });
+        let ajj = new aj();
+        this.$refs.Preloader.show("Logging In......");
+        ajj.save(userSet,{
+            type: "post",
+            success: function(model,resp) {
+                self.$refs.Preloader.hide();
+                if (resp.status == 1) {
+                  self.$router.push('/main/dashboard');
+                } else {
+                  self.$refs.BimsAlert.open('Error', resp.message, { color: 'red' });
+                }
+            },
+            error: function(err) {
+              self.$refs.Preloader.hide();
+              //self.$refs.BimsAlert.open('Error', resp.message, { color: 'red' }).then((confirm) => {})
+              self.$refs.BimsAlert.open('Error', 'An Error Occured On Server. Please try again later.', { color: 'red' });
+            }
+        });
     },
     onClickForgotPassword: function() {
-        alert("Forgot Password");
+        this.$refs.ForgotPassword.open();
     }
   }
 };

@@ -3,7 +3,7 @@ import axios from 'axios'
 
 export default {
     login (data) {
-        return Api().post('Login/InitialLogin',JSON.stringify(data));
+        return Api().post('Login/InitialLogin',data);
     },
     login1 (data) {
         return axios({
