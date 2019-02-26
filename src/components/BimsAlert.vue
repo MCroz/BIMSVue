@@ -70,10 +70,12 @@
       agree() {
         this.resolve(true)
         this.dialog = false
+        this.$store.commit("hideAlert")
       },
       cancel() {
         this.resolve(false)
         this.dialog = false
+        this.$store.commit("hideAlert")
       }
     }
   }

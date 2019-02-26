@@ -20,7 +20,27 @@ export default new Router({
         {
           path: 'dashboard',
           component: () => import('./views/Dashboard.vue')
-        }
+        },
+        {
+          path: 'residents',
+          component: () => import('./views/Residents.vue')
+        },
+        {
+          path: 'users',
+          component: () => import('./views/Users.vue')
+        },
+        {
+          path: 'medicines',
+          component: () => import('./views/Medicines.vue')
+        },
+        {
+          path: 'residenttransactions',
+          component: () => import('./views/ResidentTransactions.vue')
+        },
+        {
+          path: 'businessowners',
+          component: () => import('./views/BusinessOwners.vue')
+        },
       ]
     }
   ]

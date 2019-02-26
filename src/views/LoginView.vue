@@ -67,7 +67,7 @@ export default {
         }
         // Endpoint.login(userSet);
         let aj = Backbone.Model.extend({
-            url: "http://localhost:6513/api/Login/InitialLogin"
+            url: self.$store.state.endpointUrl + "Login/InitialLogin"
         });
         let ajj = new aj();
         this.$refs.Preloader.show("Logging In......");
@@ -76,6 +76,8 @@ export default {
             success: function(model,resp) {
                 self.$refs.Preloader.hide();
                 if (resp.status == 1) {
+                  //Set Store
+                  self.$store.commit("setCurrentUser", resp.data.User);
                   self.$router.push('/main/dashboard');
                 } else {
                   self.$refs.BimsAlert.open('Error', resp.message, { color: 'red' });

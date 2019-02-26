@@ -96,6 +96,11 @@ import Preloader from '../components/Preloader.vue'
     methods: {
         open : function()  {
             this.dialog = true
+            this.Username = '',
+            this.secretAnswer1 = null,
+            this.secretAnswer2 = null,
+            this.secretQuestion1 = null,
+            this.secretQuestion2 = null
         },
         onClickSend: function() {
             //this.dialog = false;
