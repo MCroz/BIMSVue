@@ -1,9 +1,13 @@
 import Api from '@/Services/Api'
 import axios from 'axios'
+import store from '../store'
+import Backbone from 'backbone'
 
 export default {
-    login (data) {
-        return Api().post('Login/InitialLogin',data);
+    login (params) {
+        return Api().post('Login/InitialLogin',params.data)
+        .then(params.success)
+        .catch(params.error);
     },
     login1 (data) {
         return axios({
@@ -88,6 +92,70 @@ export default {
     },
     updateOwner (params) {
         return Api().post('Owner/UpdateOwner', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    getBusinessList (params) {
+        return Api().get('Business/GetBusinessList')
+        .then(params.success)
+        .catch(params.error);
+    },
+    getBusinessClearanceListById (params) {
+        return Api().get('Print/GetBusinessPrintHistory/' + params.data )
+        .then(params.success)
+        .catch(params.error);
+    },
+    getBusinessInfo (params) {
+        return Api().get('Business/GetBusinessInfo/' + params.data )
+        .then(params.success)
+        .catch(params.error);
+    },
+    // addBusinessClearance (params) {
+    //     return Api().post('Print/GenerateBusinessClearanceTransaction', params.data)
+    //     .then(params.success)
+    //     .catch(params.error);
+    // },
+    addBusinessClearance (params) {
+        let userList = Backbone.Model.extend({
+            url: store.state.endpointUrl + "Print/GenerateBusinessClearanceTransaction"
+        });
+
+        let UserList = new userList();
+        return UserList.save(params.data,{
+            success: params.success,
+            error: params.error
+        });
+        // return Api().post('Print/GenerateBusinessClearanceTransaction', params.data)
+        // .then(params.success)
+        // .catch(params.error);
+    },
+    residentPrintTransaction (params) {
+        return Api().post('Print/InitialPrint', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    getDispenseMedicineStockList (params) {
+        return Api().get('Dispense/GetMedicineStocksList')
+        .then(params.success)
+        .catch(params.error);
+    },
+    getBlotterList (params) {
+        return Api().get('Blotter/GetBlotterList')
+        .then(params.success)
+        .catch(params.error);
+    },
+    addBlotter (params) {
+        return Api().post('Blotter/AddBlotter', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    updateBlotter (params) {
+        return Api().post('Blotter/UpdateBlotter', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    getBlotterInfo (params) {
+        return Api().get('Blotter/GetBlotterInfo/' + params.data)
         .then(params.success)
         .catch(params.error);
     },

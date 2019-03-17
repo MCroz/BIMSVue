@@ -5,6 +5,7 @@ import {
   createProtocol,
   installVueDevtools
 } from 'vue-cli-plugin-electron-builder/lib'
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -15,7 +16,16 @@ let win
 protocol.registerStandardSchemes(['app'], { secure: true })
 function createWindow () {
   // Create the browser window.
-  win = new BrowserWindow({ width: 800, height: 600 })
+  win = new BrowserWindow({
+            title: "BIMS",
+            width: 1200,
+            height: 800,
+            center: true,
+            webPreferences: {
+                nativeWindowOpen: true,
+                webSecurity: false
+            }
+        });
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
     // Load the url of the dev server if in development mode
@@ -25,11 +35,30 @@ function createWindow () {
     createProtocol('app')
     // Load the index.html when not in development
     win.loadURL('app://./index.html')
+    win.webContents.openDevTools()
   }
 
   win.on('closed', () => {
     win = null
   })
+
+  win.webContents.on('new-window', (event, url, frameName, disposition, options, additionalFeatures) => {
+    if (frameName === 'pdf-viewer') {
+      // open window as modal
+      event.preventDefault()
+      Object.assign(options, {
+        modal: true,
+        parent: win,
+        width: 100,
+        height: 100
+      })
+      const PDFWindow = require('electron-pdf-window')
+      event.newGuest = new BrowserWindow(options)
+      PDFWindow.addSupport(event.newGuest)
+      event.newGuest.loadURL(url)
+    }
+  })
+
 }
 
 // Quit when all windows are closed.

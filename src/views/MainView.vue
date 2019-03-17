@@ -74,7 +74,7 @@
         <router-view></router-view>
       <!-- </v-container> -->
     </v-content>
-    <BimsAlert ref="BimsAlert"></BimsAlert>
+    <!-- <BimsAlert ref="BimsAlert"></BimsAlert> -->
     <Preloader ref="Preloader"></Preloader>
   </v-app>
 </template>
@@ -134,11 +134,7 @@ import Preloader from '../components/Preloader.vue'
       }
     },
     watch: {
-      Alert() {
-        if (this.Alert) {
-          this.$refs.BimsAlert.open('Error', this.$store.state.alertMessage, { color: 'red' });
-        }
-      },
+
       Preloader() {
         if (this.Preloader) {
           //Show Preloader
@@ -183,33 +179,43 @@ import Preloader from '../components/Preloader.vue'
       }
     },
     mounted() {
-      if (this.$store.state.currentUser.Role == 'Administrator') {
-        this.drawerItems= [
-          { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
-          { icon: "people", title: "Residents", url: "/main/residents"},
-          { icon: "person", title: "Users", url: "/main/users"},
-          { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
-          { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
-          { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
-          { icon: "report_problem", title: "Blotter", url: "/main/blotters"},
-          { icon: "description", title: "Reports", url: "/main/reports"}
-        ];
-      } else if(this.$store.state.currentUser.Role == 'Document Staff') {
-        this.drawerItems= [
-          { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
-          { icon: "people", title: "Residents", url: "/main/residents"},
-          { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
-          { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
-          { icon: "report_problem", title: "Blotter", url: "/main/blotters"}
-        ];
-      } else {
-        this.drawerItems= [
-          { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
-          { icon: "people", title: "Residents", url: "/main/residents"},
-          { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
-          { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"}
-        ];
-      }
+
+      // if (this.$store.state.currentUser.SecretQuestion1 == null) {
+      //   this.drawerItems = [];
+      // } else {
+
+        if (this.$store.state.currentUser.Role == 'Administrator') {
+          this.drawerItems= [
+            { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
+            { icon: "people", title: "Residents", url: "/main/residents"},
+            { icon: "person", title: "Users", url: "/main/users"},
+            { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
+            { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
+            { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
+            { icon: "file_copy", title: "Business Clearance", url: "/main/businessclearance"},
+            { icon: "report_problem", title: "Blotter", url: "/main/blotters"},
+            { icon: "description", title: "Reports", url: "/main/reports"}
+          ];
+        } 
+        else if(this.$store.state.currentUser.Role == 'Document Staff') {
+          this.drawerItems= [
+            { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
+            { icon: "people", title: "Residents", url: "/main/residents"},
+            { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
+            { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
+            { icon: "file_copy", title: "Business Clearance", url: "/main/businessclearance"},
+            { icon: "report_problem", title: "Blotter", url: "/main/blotters"}
+          ];
+        } 
+        else {
+          this.drawerItems= [
+            { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
+            { icon: "people", title: "Residents", url: "/main/residents"},
+            { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
+            { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"}
+          ];
+        }
+      // }
     }
   }
 </script>

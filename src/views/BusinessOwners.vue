@@ -223,7 +223,7 @@
                               <td>{{ props.item.DTI_SEC_RegNo }}</td>
                               <td>{{ props.item.BusinessContactNo }}</td>
                               <td>{{ props.item.KindOfBusiness }}</td>
-                              <td>₱{{ props.item.Capitalization }}</td>
+                              <td>{{ props.item.Capitalization | formatCurrency }}</td>
                             </template>
                           </v-data-table>
                         </v-card-text>
@@ -419,7 +419,7 @@ export default {
                   self.getOwners();
                 });
               } else {
-                self.$swal("Error",response.message, "error");
+                self.$swal("Error",response.data.message, "error");
               }
             },
             error: (err) => {
@@ -450,7 +450,7 @@ export default {
             self.rerenderKey += 1
             self.NewOwnerDialog = true;
           } else {
-            self.$swal("Error",response.message, "error");
+            self.$swal("Error",response.data.message, "error");
           }
         },
         error: (err) => {
@@ -497,7 +497,7 @@ export default {
                   self.getOwners();
                 });
               } else {
-                this.$swal("Error",response.message, "error");
+                this.$swal("Error",response.data.message, "error");
               }
             },
             error: (err) => {
@@ -520,7 +520,7 @@ export default {
                   self.getOwners();
                 });
               } else {
-                this.$swal("Error",response.message, "error");
+                this.$swal("Error",response.data.message, "error");
               }
             },
             error: (err) => {
@@ -551,15 +551,14 @@ export default {
           success: (resp) => {
               this.$store.commit("hidePreloader");
               if (resp.data.status == 1) {
-                
                 this.owners.items = resp.data.data;
               } else {
-                this.$store.commit("showAlert",resp.message);
+                this.$swal("Error",resp.data.message, "error");
               }
           },
           error: function(err) {
             this.$store.commit("hidePreloader");
-            this.$store.commit("showAlert", "An Error Occured On Server. Please try again later.");
+            this.$swal("Error","An Error Occured On Server. Please try again later.", "error");
           }
       });
     },

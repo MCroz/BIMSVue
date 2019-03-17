@@ -43,25 +43,25 @@
                         <v-text-field 
                           v-model="resident.FirstName" 
                           label="First Name" 
-                          :rules="[v => !!v || 'First Name is required']"
+                          :rules="[v => !!v || 'First Name is required', v => /^[a-z]+$/i.test(v) || 'Alphabets Only']"
                           required ></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
                         <v-text-field 
                           v-model="resident.MiddleName" 
                           label="Middle Name" 
-                          :rules="[v => !!v || 'Middle Name is required']"
+                          :rules="[v => !!v || 'Middle Name is required', v => /^[a-z]+$/i.test(v) || 'Alphabets Only']"
                           required></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
                         <v-text-field 
                           v-model="resident.LastName" 
                           label="Last Name"
-                          :rules="[v => !!v || 'Last Name is required']"
+                          :rules="[v => !!v || 'Last Name is required', v => /^[a-z]+$/i.test(v) || 'Alphabets Only']"
                           required></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
-                        <v-radio-group v-model="resident.Gender" :rules="[v => !!v || 'Civil Status is required']">
+                        <v-radio-group v-model="resident.Gender" :rules="[v => !!v || 'Gender is required']">
                           <v-radio label="Male" value="Male"></v-radio>
                           <v-radio label="Female" value="Female"></v-radio>
                         </v-radio-group>
@@ -69,7 +69,7 @@
                       <v-flex xs12 sm6 md4>
                         <v-select
                           :items="civilStatusOptions"
-                          label="Role"
+                          label="Civil Status"
                           v-model="resident.CivilStatus"
                           :rules="[v => !!v || 'Civil Status is required']"
                           required
@@ -108,7 +108,7 @@
                         <v-text-field 
                           v-model="resident.AddressNo" 
                           label="Address No"
-                          :rules="[v => !!v || 'Address No is required']"
+                          :rules="[v => !!v || 'Address No is required', v => /^[0-9]+$/.test(v) || 'Numbers Only']"
                           required></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
@@ -187,21 +187,21 @@
                         <v-text-field 
                           v-model="editResident.FirstName" 
                           label="First Name" 
-                          :rules="[v => !!v || 'First Name is required']"
+                          :rules="[v => !!v || 'First Name is required', v => /^[a-z]+$/i.test(v) || 'Alphabets Only']"
                           required ></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
                         <v-text-field 
                           v-model="editResident.MiddleName" 
                           label="Middle Name" 
-                          :rules="[v => !!v || 'Middle Name is required']"
+                          :rules="[v => !!v || 'Middle Name is required',  v => /^[a-z]+$/i.test(v) || 'Alphabets Only']"
                           required></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
                         <v-text-field 
                           v-model="editResident.LastName" 
                           label="Last Name"
-                          :rules="[v => !!v || 'Last Name is required']"
+                          :rules="[v => !!v || 'Last Name is required',  v => /^[a-z]+$/i.test(v) || 'Alphabets Only']"
                           required></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
@@ -213,7 +213,7 @@
                       <v-flex xs12 sm6 md4>
                         <v-select
                           :items="civilStatusOptions"
-                          label="Role"
+                          label="Civil Status"
                           v-model="editResident.CivilStatus"
                           :rules="[v => !!v || 'Civil Status is required']"
                           required
@@ -252,7 +252,7 @@
                         <v-text-field 
                           v-model="editResident.AddressNo" 
                           label="Address No"
-                          :rules="[v => !!v || 'Address No is required']"
+                          :rules="[v => !!v || 'Address No is required', v => /^[0-9]+$/.test(v) || 'Numbers Only']"
                           required></v-text-field>
                       </v-flex>
                       <v-flex xs12 sm6 md4>
@@ -486,7 +486,7 @@ export default {
                 self.getResidents();
               });
             } else {
-              this.$swal("Error",response.message, "error");
+              this.$swal("Error",response.data.message, "error");
             }
           },
           error: (err) => {
@@ -521,7 +521,7 @@ export default {
                 self.getResidents();
               });
             } else {
-              this.$swal("Error",response.message, "error");
+              this.$swal("Error",response.data.message, "error");
             }
           },
           error: (err) => {
@@ -571,12 +571,12 @@ export default {
                 });
                 this.residents.items = resp.data;
               } else {
-                this.$store.commit("showAlert",resp.message);
+                this.$swal("Error",resp.message,"error");
               }
           },
           error: function(err) {
             this.$store.commit("hidePreloader");
-            this.$store.commit("showAlert", "An Error Occured On Server. Please try again later.");
+            this.$swal("Error","An Error Occured On Server. Please try again later.","error");
           }
       });
     },

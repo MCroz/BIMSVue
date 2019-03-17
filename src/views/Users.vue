@@ -269,12 +269,12 @@ export default {
                 });
                 this.users.items = resp.data;
               } else {
-                this.$store.commit("showAlert",resp.message);
+                this.$swal("Error",resp.message, "error");
               }
           },
           error: function(err) {
             this.$store.commit("hidePreloader");
-            this.$store.commit("showAlert", "An Error Occured On Server. Please try again later.");
+            this.$swal("Error","An Error Occured On Server. Please try again later.", "error");
           }
       });
     },

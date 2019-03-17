@@ -9,15 +9,19 @@ export default new Vuex.Store({
     currentUser: null,
     endpointUrl: "http://localhost:6513/api/",
     serverUrl: "http://localhost:6513/",
+    // endpointUrl: "http://ajtest.somee.com/api/",
+    // serverUrl: "http://ajtest.somee.com/",
     preloader: false,
     alert: false,
     alertMessage: "",
-
     successAlert: false,
     successAlertMessage: "",
   },
   mutations: {
     //this is where we will allow setting values
+    test (state, data) {
+      state.endpointUrl = data
+    },
     setCurrentUser (state, data) {
       state.currentUser = data
     },

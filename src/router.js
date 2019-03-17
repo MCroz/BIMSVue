@@ -41,6 +41,14 @@ export default new Router({
           path: 'businessowners',
           component: () => import('./views/BusinessOwners.vue')
         },
+        {
+          path: 'businessclearance',
+          component: () => import('./views/BusinessClearance.vue')
+        },     
+        {
+          path: 'blotters',
+          component: () => import('./views/Blotters.vue')
+        },     
       ]
     }
   ]

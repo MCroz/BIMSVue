@@ -313,7 +313,7 @@ export default {
             //Add to array
             this.stocks.items = response.data.data;
           } else {
-            this.$swal("Error",response.message, "error");
+            this.$swal("Error",response.data.message, "error");
           }
         },
         error: (err) => {
@@ -338,7 +338,7 @@ export default {
             this.detailedStocks.items = response.data.data;
             this.ViewDetailedStockDialog = true;
           } else {
-            this.$swal("Error",response.message, "error");
+            this.$swal("Error",response.data.message, "error");
           }
         },
         error: (err) => {
@@ -367,7 +367,7 @@ export default {
                 self.getMedicineStockList();
               });
             } else {
-              this.$swal("Error",response.message, "error");
+              this.$swal("Error",response.data.message, "error");
             }
           },
           error: (err) => {
@@ -388,7 +388,7 @@ export default {
             this.newStocksMedicineNames = resp.data.data;
             this.AddNewStockDialog = true;
           } else {
-            this.$swal("Error",resp.message, "error");
+            this.$swal("Error",resp.data.message, "error");
           }
         },
         error: (err) => {
@@ -418,7 +418,7 @@ export default {
                 self.getMedicineStockList();
               });
             } else {
-              this.$swal("Error",response.message, "error");
+              this.$swal("Error",response.data.message, "error");
             }
           },
           error: (err) => {

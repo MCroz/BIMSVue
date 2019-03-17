@@ -66,21 +66,18 @@ export default {
             password: password
         }
         // Endpoint.login(userSet);
-        let aj = Backbone.Model.extend({
-            url: self.$store.state.endpointUrl + "Login/InitialLogin"
-        });
-        let ajj = new aj();
+
         this.$refs.Preloader.show("Logging In......");
-        ajj.save(userSet,{
-            type: "post",
-            success: function(model,resp) {
+        this.Endpoints.login({
+          data: userSet,
+            success: (resp) => {
                 self.$refs.Preloader.hide();
-                if (resp.status == 1) {
+                if (resp.data.status == 1) {
                   //Set Store
-                  self.$store.commit("setCurrentUser", resp.data.User);
+                  self.$store.commit("setCurrentUser", resp.data.data.User);
                   self.$router.push('/main/dashboard');
                 } else {
-                  self.$refs.BimsAlert.open('Error', resp.message, { color: 'red' });
+                  self.$refs.BimsAlert.open('Error', resp.data.message, { color: 'red' });
                 }
             },
             error: function(err) {
