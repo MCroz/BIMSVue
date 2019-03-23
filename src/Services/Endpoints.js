@@ -159,4 +159,48 @@ export default {
         .then(params.success)
         .catch(params.error);
     },
+    newDispenseTransaction (params) {
+        return Api().post('Dispense/NewDispenseTransaction', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    getMedicineTransactions (params) {
+        return Api().get('Dispense/ListDispenseTransactionV2/' + params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    updateFirstTimeLogin (params) {
+        return Api().post('Users/FirstTimeLogin', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    updateUserProfile (params) {
+        return Api().post('Users/UpdateUserProfile', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
+    // getDetailedMedicineTransactions (params) {
+    //     return Api().get('Dispense/ListDispenseMedicinesV2/' + params.data)
+    //     .then(params.success)
+    //     .catch(params.error);
+    // },
+    getDetailedMedicineTransactions (params) {
+        let transactList = Backbone.Model.extend({
+            url: store.state.endpointUrl + "Dispense/ListDispenseMedicinesV2/" + params.data
+        });
+
+        let TransactList = new transactList();
+        return TransactList.fetch({
+            success: params.success,
+            error: params.error
+        });
+        // return Api().post('Print/GenerateBusinessClearanceTransaction', params.data)
+        // .then(params.success)
+        // .catch(params.error);
+    },
+    generateReports (params) {
+        return Api().post('Reports/GetPreMadeReports', params.data)
+        .then(params.success)
+        .catch(params.error);
+    },
 }

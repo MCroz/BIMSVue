@@ -66,7 +66,7 @@
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" flat @click="EditUserDialog = false">Close</v-btn>
-          <v-btn color="blue darken-1" flat @click="addUser">Save</v-btn>
+          <v-btn color="blue darken-1" flat @click="onClickEditSave">Save</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -340,6 +340,42 @@ export default {
           });
         }
       })
+    },
+    onClickEditSave : function(){
+      var self = this;
+      if (this.$refs.editUserForm.validate()) { 
+        let updateUserModel = Backbone.Model.extend({
+          url: this.$store.state.endpointUrl + "Users/UpdateUser"
+        });
+        let updateUser = new updateUserModel();
+        let myData = {
+            ID: self.updateUser.ID,
+            FirstName: self.updateUser.FirstName,
+            MiddleName: self.updateUser.MiddleName,
+            LastName: self.updateUser.LastName,
+            Username: self.updateUser.Username,
+            Role: self.updateUser.Role,
+            ModifiedBy: self.$store.state.currentUser.ID
+        }
+        this.$store.commit("showPreloader");
+        updateUser.save(myData, {
+          success: (model,response) => {
+              this.$store.commit("hidePreloader");
+              if (response.status == 1) {
+                this.$swal("Success","Successfully Updated", "success").then((value) => {
+                  self.getUsers();
+                  self.EditUserDialog = false;
+                });
+              } else {
+                this.$swal("Error",response.message, "error");
+              }
+          },
+          error: (err) => {
+            this.$store.commit("hidePreloader");
+            this.$swal("Error","An Error Occured On Server. Please try again later.", "error");
+          }
+        });
+      }
     },
     editUser: function(user) {
       this.EditUserDialog = true;

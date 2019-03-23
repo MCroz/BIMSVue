@@ -1,7 +1,7 @@
 <template>
   <v-app id="inspire">
     <v-toolbar color="blue darken-3" dark fixed app clipped-right>
-      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer" v-if="!firstTimeLogin"></v-toolbar-side-icon>
       <v-spacer></v-spacer>
        <!-- <v-btn icon @click.stop="">
         <v-icon>account_circle</v-icon>
@@ -14,7 +14,7 @@
           <v-icon>account_circle</v-icon>
         </v-btn>
         <v-list class="pa-0">
-          <v-list-tile v-for="(item,index) in items" :to="!item.href ? { name: item.name } : null" :href="item.href" @click="item.click" ripple="ripple" :disabled="item.disabled" :target="item.target" rel="noopener" :key="index">
+          <v-list-tile v-for="(item,index) in items" :to="!item.href ? { name: item.name } : null" :href="item.href" :hidden="firstTimeLogin && item.title == 'Profile'" @click="item.click" ripple="ripple" :disabled="item.disabled" :target="item.target" rel="noopener" :key="index">
             <v-list-tile-action v-if="item.icon">
               <v-icon>{{ item.icon }}</v-icon>
             </v-list-tile-action>
@@ -29,7 +29,7 @@
 
 
     </v-toolbar>
-    <v-navigation-drawer v-model="drawer" fixed app>
+    <v-navigation-drawer v-model="drawer" fixed app v-if="!firstTimeLogin">
     <!-- <v-toolbar color="blue darken-3" dark fixed app clipped-right></v-toolbar> -->
 
           <v-img :aspect-ratio="16/9" src="https://cdn.vuetifyjs.com/images/parallax/material.jpg">
@@ -91,6 +91,7 @@ import Preloader from '../components/Preloader.vue'
     },
     data () { 
       return {
+        firstTimeLogin: false,
         drawer: false,
         width: 300,
         drawerItems: [
@@ -110,7 +111,8 @@ import Preloader from '../components/Preloader.vue'
             href: '#',
             title: 'Profile',
             click: (e) => {
-              console.log(e);
+              //console.log(e);
+              this.$router.push("/main/profile");
             }
           },
           {
@@ -134,7 +136,6 @@ import Preloader from '../components/Preloader.vue'
       }
     },
     watch: {
-
       Preloader() {
         if (this.Preloader) {
           //Show Preloader
@@ -149,6 +150,11 @@ import Preloader from '../components/Preloader.vue'
           this.$refs.BimsAlert.open('Success', this.$store.state.successAlertMessage, { color: 'green' });
         }
       },
+      currentUser() {
+        if (this.currentUser.SecretQuestion1ID != null) {
+          this.firstTimeLogin = false;
+        }
+      }
     },
     computed: {
       Alert: {
@@ -170,6 +176,10 @@ import Preloader from '../components/Preloader.vue'
         let curUser = this.$store.state.currentUser;
         return curUser.Role;
       },
+      currentUser () {
+        let curUser = this.$store.state.currentUser;
+        return curUser;
+      }
     },
     beforeCreate() {
       //Handle Before Creation
@@ -180,42 +190,45 @@ import Preloader from '../components/Preloader.vue'
     },
     mounted() {
 
-      // if (this.$store.state.currentUser.SecretQuestion1 == null) {
-      //   this.drawerItems = [];
-      // } else {
+      if (this.$store.state.currentUser.SecretQuestion1ID == null) {
+        this.firstTimeLogin = true;
+        this.$router.push("/main/firsttimelogin");
+      } else {
+        this.firstTimeLogin = false;
+      }
 
-        if (this.$store.state.currentUser.Role == 'Administrator') {
-          this.drawerItems= [
-            { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
-            { icon: "people", title: "Residents", url: "/main/residents"},
-            { icon: "person", title: "Users", url: "/main/users"},
-            { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
-            { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
-            { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
-            { icon: "file_copy", title: "Business Clearance", url: "/main/businessclearance"},
-            { icon: "report_problem", title: "Blotter", url: "/main/blotters"},
-            { icon: "description", title: "Reports", url: "/main/reports"}
-          ];
-        } 
-        else if(this.$store.state.currentUser.Role == 'Document Staff') {
-          this.drawerItems= [
-            { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
-            { icon: "people", title: "Residents", url: "/main/residents"},
-            { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
-            { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
-            { icon: "file_copy", title: "Business Clearance", url: "/main/businessclearance"},
-            { icon: "report_problem", title: "Blotter", url: "/main/blotters"}
-          ];
-        } 
-        else {
-          this.drawerItems= [
-            { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
-            { icon: "people", title: "Residents", url: "/main/residents"},
-            { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
-            { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"}
-          ];
-        }
-      // }
+      if (this.$store.state.currentUser.Role == 'Administrator') {
+        this.drawerItems= [
+          { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
+          { icon: "people", title: "Residents", url: "/main/residents"},
+          { icon: "person", title: "Users", url: "/main/users"},
+          { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
+          { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
+          { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
+          { icon: "file_copy", title: "Business Clearance", url: "/main/businessclearance"},
+          { icon: "report_problem", title: "Blotter", url: "/main/blotters"},
+          { icon: "description", title: "Reports", url: "/main/reports"}
+        ];
+      } 
+      else if(this.$store.state.currentUser.Role == 'Document Staff') {
+        this.drawerItems= [
+          { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
+          { icon: "people", title: "Residents", url: "/main/residents"},
+          { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"},
+          { icon: "file_copy", title: "Business Owners", url: "/main/businessowners"},
+          { icon: "file_copy", title: "Business Clearance", url: "/main/businessclearance"},
+          { icon: "report_problem", title: "Blotter", url: "/main/blotters"}
+        ];
+      } 
+      else {
+        this.drawerItems= [
+          { icon: "insert_chart_outlined", title: "Dashboard", url: "/main/dashboard"},
+          { icon: "people", title: "Residents", url: "/main/residents"},
+          { icon: "local_pharmacy", title: "Medicine Inventory", url: "/main/medicines"},
+          { icon: "local_grocery_store", title: "Residents Transaction", url: "/main/residenttransactions"}
+        ];
+      }
+    // }
     }
   }
 </script>

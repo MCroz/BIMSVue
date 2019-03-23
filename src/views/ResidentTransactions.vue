@@ -40,6 +40,125 @@
                 <v-flex sm6>
                   <v-checkbox v-model="Prescriptive" label="Prescriptive"></v-checkbox>
                 </v-flex>
+
+                <v-flex xs12 v-if="Prescriptive">
+                  <v-card>
+                    <v-toolbar flat color="white">
+                      <v-toolbar-title>Medicine List With Prescription</v-toolbar-title>
+                      <v-divider
+                        class="mx-2"
+                        inset
+                        vertical
+                      ></v-divider>
+                      <v-dialog persistent v-model="PrescriptiveMedicineListDialog" max-width="900px">
+                        
+                        <v-card>
+                          <v-card-title>
+                            <span class="headline">Select Medicine</span>
+                          </v-card-title>
+
+                          <v-card-text>
+                                <v-card>
+                                  <v-card-title>
+                                    <span class="headline">Add Medicines with Prescription</span>
+                                  </v-card-title>
+                                  <v-toolbar card color="white">
+                                    <v-text-field
+                                    flat
+                                    solo
+                                    prepend-icon="search"
+                                    placeholder="Search Medicine Stocks"
+                                    v-model="SearchPreAddMedicines"
+                                    hide-details
+                                    class="hidden-sm-and-down"
+                                    ></v-text-field> 
+                                  </v-toolbar>
+                                  <v-divider></v-divider>
+                                  <v-card-text class="pa-0">
+                                    <v-data-table
+                                      :headers="PreAddMedicinesHeader"
+                                      :search="SearchPreAddMedicines"
+                                      :items="PreAddMedicinesItems"
+                                      :rows-per-page-items="[10,25,50,{text:'All','value':-1}]"
+                                      class="elevation-1"
+                                      item-key="StockID"
+                                      >
+                                      <template v-if="Prescriptive" v-slot:items="props">
+                                        <td>
+                                          <v-btn flat icon color="pink" @click="onClickAddToPreMeds(props.item)">
+                                            <v-icon>add_circle</v-icon>
+                                          </v-btn>
+                                        </td>  
+                                        <td>{{ props.item.MedicineName }}</td>
+                                        <td>{{ props.item.ExpirationDate | formatDate}}</td>
+                                        <td>{{ props.item.Total }}</td>
+                                        <td>
+                                          <v-select
+                                          min-width="150px"
+                                            :items="IntakeOptions"
+                                            label="Intake"
+                                            v-model="props.item.Intake"
+                                            :rules="[v => v != 0 || 'Intake is required']"
+                                            required
+                                            :change="onChangeDaysAndIntake(props.item)"
+                                          ></v-select>
+                                        </td>
+                                        <td>
+                                          <v-select
+                                            min-width="150px"
+                                            :items="NumberOfDaysOptions"
+                                            label="# of Days"
+                                            v-model="props.item.Days"
+                                            :rules="[v => v != 0 || '# of Days is required']"
+                                            required
+                                            :change="onChangeDaysAndIntake(props.item)"
+                                          ></v-select>
+                                        </td>
+                                        <td>
+                                          {{props.item.AmountToDispense  }}
+                                        </td>
+                                      </template>
+                                    </v-data-table>
+                                  </v-card-text>
+                                </v-card>
+                          </v-card-text>
+                          <v-card-actions>
+                            <v-spacer></v-spacer>
+                            <v-btn color="blue darken-1" flat @click="PrescriptiveMedicineListDialog = false">Close</v-btn>
+                          </v-card-actions>
+                        </v-card>
+                      </v-dialog>
+                    </v-toolbar>
+                    
+                    <v-btn left color="primary" dark class="mb-2" @click="onClickAddMedicinePre">Add Medicine With Prescription</v-btn>
+
+
+                    <v-card-text class="pa-0">
+                      <v-data-table
+                        :headers="ToDispensePreMedicinesHeader"
+                        :items="PreMedicines"
+                        item-key="ID"
+                        hide-actions
+                        >
+                        <template slot="items" slot-scope="props" v-if="Prescriptive">
+                        <td>
+                          <v-btn flat icon color="pink" @click="onClickRemovePreMeds(props.item)">
+                            <v-icon>delete_sweep</v-icon>
+                          </v-btn>
+                        </td>
+                          <td>{{ props.item.MedicineName }}</td>
+                          <!-- <td>{{ props.item.Description }}</td> -->
+                          <td>{{ props.item.ExpirationDate | formatDate }}</td>
+                          <td>{{ props.item.Total }}</td>
+                          <td>{{ props.item.Intake }}</td>
+                          <td>{{ props.item.Days }}</td>
+                          <td>{{ props.item.AmountToDispense }}</td>
+                        </template>
+                      </v-data-table>
+                    </v-card-text>
+                  </v-card>
+                </v-flex>
+
                 <v-flex xs12 v-if="!Prescriptive">
                   <v-card>
                     <v-toolbar flat color="white">
@@ -80,9 +199,9 @@
                                       :items="NonPreAddMedicinesItems"
                                       :rows-per-page-items="[10,25,50,{text:'All','value':-1}]"
                                       class="elevation-1"
-                                      item-key="ID"
+                                      item-key="StockID"
                                       >
-                                      <template slot="items" slot-scope="props">
+                                      <template v-if="!Prescriptive" slot="items" slot-scope="props">
                                         <td>
                                           <v-btn flat icon color="pink" @click="onClickAddToNonPreMeds(props.item)">
                                             <v-icon>add_circle</v-icon>
@@ -99,6 +218,13 @@
                                             :max="props.item.Total == 0 ? 0 : props.item.Total < 12 ? props.item.Total : 12" 
                                             :step="1">
                                           </vue-numeric-input>
+                                          <number-input 
+                                            v-model="props.item.AmountToDispense" 
+                                            :min="props.item.Total == 0 ? 0 : 1" 
+                                            :max="props.item.Total == 0 ? 0 : props.item.Total < 12 ? props.item.Total : 12" 
+                                            inline 
+                                            controls>
+                                            </number-input>
                                         </td>
                                       </template>
                                     </v-data-table>
@@ -115,12 +241,12 @@
                     <v-btn left color="primary" dark class="mb-2" @click="onClickAddMedicineNonPre">Add Medicine</v-btn>
                     <v-card-text class="pa-0">
                       <v-data-table
-                        :headers="MedicinesHeader"
+                        :headers="ToDispenseNonPreMedicinesHeader"
                         :items="NonPreMedicines"
                         item-key="ID"
                         hide-actions
                         >
-                        <template slot="items" slot-scope="props">
+                        <template slot="items" slot-scope="props" v-if="!Prescriptive">
                         <td>
                           <v-btn flat icon color="pink" @click="onClickRemoveNonPreMeds(props.item)">
                             <v-icon>delete_sweep</v-icon>
@@ -143,7 +269,7 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn color="blue darken-1" flat @click="PreDispenseDialog = false">Cancel</v-btn>
-            <v-btn flat color="pink" @click="">
+            <v-btn flat color="pink" @click="onClickDispense">
               Dispense
               <v-icon>touch_app</v-icon>
             </v-btn>
@@ -239,7 +365,7 @@
           >
             <v-tabs-slider color="yellow"></v-tabs-slider>
 
-            <v-tab href="#tab-1" v-if="$store.state.currentUser.Role != 'Document Staff'">
+            <v-tab href="#tab-1" v-if="$store.state.currentUser.Role != 'Document Staff'" @click="getMedicineTransactions">
               Medicines
               <v-icon>phone</v-icon>
             </v-tab>
@@ -255,6 +381,63 @@
             </v-tab>
 
             <v-tab-item :value="'tab-1'">
+
+
+
+
+              <v-dialog v-model="ViewDetailedDispenseDialog" persistent max-width="900px">
+                <v-card>
+                  <v-card-title>
+                    <span class="headline">View Detailed Information</span>
+                  </v-card-title>
+                  <v-toolbar card color="white">
+                    <v-text-field
+                    flat
+                    solo
+                    prepend-icon="search"
+                    placeholder="Search Medicines"
+                    v-model="searchDetailedDispenseDialog"
+                    hide-details
+                    class="hidden-sm-and-down"
+                    ></v-text-field> 
+                  </v-toolbar>
+                  <v-divider></v-divider>
+                  <v-card-text class="pa-0">
+                    <v-data-table
+                      :headers="detailedDispense.headers"
+                      :search="searchDetailedDispenseDialog"
+                      :items="detailedDispense.items"
+                      :rows-per-page-items="[10,25,50,{text:'All','value':-1}]"
+                      class="elevation-1"
+                      item-key="ID"
+                      >
+
+                      <template slot="headerCell" slot-scope="props" v-if="viewPrescriptive || props.header.text != 'Prescription Information'">
+                        <span>
+                          {{ props.header.text }}
+                        </span>
+                      </template>
+
+                      <template slot="items" slot-scope="props">     
+                        <td>{{ props.item.Medicine }}</td>
+                        <td>{{ props.item.Description }}</td>
+                        <td>{{ props.item.ExpirationDate | formatDate }}</td>
+                        <td>{{ props.item.Quantity }}</td>
+                        <td v-if="viewPrescriptive">{{ props.item.PrescriptionInformation }}</td>
+                      </template>
+                    </v-data-table>
+                  </v-card-text>
+                  <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn color="blue darken-1" flat @click="ViewDetailedDispenseDialog = false">Close</v-btn>
+                  </v-card-actions>
+                </v-card>
+              </v-dialog>
+
+
+
+
+
               <v-card>
                 <v-toolbar card color="white">
                   <v-text-field
@@ -281,7 +464,7 @@
                       <td>
                         <v-tooltip right>
                           <template #activator="data">
-                            <v-btn v-on="data.on" depressed outline icon fab dark color="primary" small>
+                            <v-btn @click="onViewDetailedDispense(props.item)" v-on="data.on" depressed outline icon fab dark color="primary" small>
                               <v-icon>assignment_late</v-icon>
                             </v-btn>
                           </template>
@@ -289,8 +472,8 @@
                         </v-tooltip>
                       </td>          
                       <td>{{ props.item.CreatedBy }}</td>
-                      <td>{{ props.item.DateDispensed }}</td>
-                      <td>{{ props.item.PreparationDescription }}</td>
+                      <td>{{ props.item.DateDispensed | formatDate }}</td>
+                      <td>{{ props.item.Prescriptive }}</td>
                       
                     </template>
                   </v-data-table>
@@ -410,6 +593,38 @@ const _ = require('underscore');
 export default {
   data () {
     return {
+      SelectedDays: "",
+      NumberOfDaysOptions: [{text: '3 Days', value: 3}, {text: '2 Days', value: 2}, {text: '1 Day', value: 1}],
+      IntakeOptions: [
+        {text: '4x a Day', value: 4}, 
+        {text: '3x a Day', value: 3}, 
+        {text: '2x a Day', value: 2}, 
+        {text: '1x a Day', value: 1}
+      ],
+      PreAddMedicinesItems: [],
+      SearchPreAddMedicines: "",
+      PreAddMedicinesHeader: [
+          { text: 'Action', value: '' },
+          { text: 'Medicine Name', value: 'MedicineName' },
+          // { text: 'Description', value: 'Description' },
+          { text: 'Expiration Date', value: 'ExpirationDate' },
+          { text: 'Stocks on Hand', value: 'Total' },
+          { text: 'Intake', value: '' },
+          { text: '# of Days', value: '' },
+          { text: 'Quantity To Dispense', value: '' }
+      ],
+      PrescriptiveMedicineListDialog: false,
+      ToDispensePreMedicinesHeader: [
+          { text: 'Action', value: '' },
+          { text: 'Medicine Name', value: 'MedicineName' },
+          { text: 'Expiration Date', value: 'ExpirationDate' },
+          { text: 'Current Stock', value: 'Total' },
+          { text: 'Intake', value: '' },
+          { text: 'Days', value: '' },
+          { text: 'Quantity To Dispense', value: '' },
+      ],
+
+
       NonPreAddMedicinesItems: [],
       SearchNonPreAddMedicines: "",
       NonPreAddMedicinesHeader: [
@@ -421,15 +636,16 @@ export default {
           { text: '', value: '' }
       ],
       NonPrescriptiveMedicineListDialog: false,
-      MedicinesHeader: [
+      ToDispenseNonPreMedicinesHeader: [
           { text: 'Action', value: '' },
           { text: 'Medicine Name', value: 'MedicineName' },
           // { text: 'Description', value: 'Description' },
-          { text: 'Expiration Date', value: 'Quantity' },
-          { text: 'Current Stock', value: 'dasdas' },
-          { text: 'Quantity', value: 'Quantffity' },
+          { text: 'Expiration Date', value: 'ExpirationDate' },
+          { text: 'Current Stock', value: '' },
+          { text: 'Quantity', value: '' },
       ],
       NonPreMedicines: [],
+      PreMedicines: [],
       Prescriptive: false,
       PreDispenseDialog: false,
       PrePrintDialog: false,
@@ -442,7 +658,7 @@ export default {
             { text: 'Action', value: '' },
             { text: 'Dispensed By', value: 'MedicineName' },
             { text: 'Dispensed Date', value: 'Description' },
-            { text: 'Prescription Description', value: 'Quantity' },
+            { text: 'Prescriptive', value: 'Prescriptive' }
         ],
         items: []
       },
@@ -473,19 +689,175 @@ export default {
       SelectedPurpose: "",
       SelectedPurposeOthers: "",
       SelectedCertificate: "",
-      PurposeOptions: ["Financial Assistance", "Scholarship Application", "TUPAD Application", "Others"]
+      PurposeOptions: ["Financial Assistance", "Scholarship Application", "TUPAD Application", "Others"],
+      ViewDetailedDispenseDialog: false,
+      searchDetailedDispenseDialog: "",
+      detailedDispense: {
+        headers: [
+            { text: 'Medicine Name', value: 'MedicineName' },
+            { text: 'Description', value: 'Description' },
+            { text: 'Expiration Date', value: 'ExpirationDate' },
+            { text: 'Quantity', value: 'Quantity' },
+            { text: 'Prescription Information', value: 'PrescriptionInformation' },
+        ],
+        items: []
+      },
+      viewPrescriptive: false,
     };
   },
   methods: {
+    onClickDispense: function() {
+      //Check if Prescriptive or Not
+      let DispenseObj = {
+        ResidentID : this.SelectedResident.ID,
+        CreatedBy : this.$store.state.currentUser.ID,
+        ModifiedBy : this.$store.state.currentUser.ID,
+      };
+      if (this.Prescriptive) {
+        //Count All Prescriptive Meds
+        if (this.PreMedicines.length < 1) {
+          this.$swal("error", "Please Enter At Least 1 Medicine.","error");
+        } else {
+          //Build Object
+          DispenseObj.Prescriptive = 1;
+          //Loop
+          let imArr = [];
+          this.PreMedicines.forEach((im) => {
+            let imObj = {
+              StockID: im.StockID,
+              Quantity: im.AmountToDispense,
+              Days: im.Days,
+              Intakes: im.Intake,
+            };
+            imArr.push(imObj);
+          });
+          DispenseObj.InventoryMovement = imArr;
+          // RUN API
+          var self = this;
+          this.$store.commit("showPreloader");
+          this.Endpoints.newDispenseTransaction({
+            data: DispenseObj,
+            success: (response) => {
+              this.$store.commit("hidePreloader");
+              if (response.data.status == 1) {
+                this.$swal("Success","Successfully Dispensed", "success").then((value) => {
+                  self.PreDispenseDialog = false;
+                });
+
+              } else {
+                this.$swal("error", response.data.message,"error");
+              }
+            },
+            error: (err) => {
+              this.$store.commit("hidePreloader");
+              this.$swal("error", "An Error Occured On Server. Please try again later.","error");
+            }
+          });
+
+        }
+      } else {
+        if (this.NonPreMedicines.length < 1) {
+          this.$swal("error", "Please Enter At Least 1 Medicine.","error");
+        } else {
+          //Build Object
+          DispenseObj.Prescriptive = 0;
+          let imArr = [];
+          this.NonPreMedicines.forEach((im) => {
+            let imObj = {
+              StockID: im.StockID,
+              Quantity: im.AmountToDispense,
+              Days: null,
+              Intakes: null,
+            };
+            imArr.push(imObj);
+          });
+          DispenseObj.InventoryMovement = imArr;
+          var self = this;
+          this.$store.commit("showPreloader");
+          this.Endpoints.newDispenseTransaction({
+            data: DispenseObj,
+            success: (response) => {
+              this.$store.commit("hidePreloader");
+              if (response.data.status == 1) {
+                this.$swal("Success","Successfully Dispensed", "success").then((value) => {
+                  self.PreDispenseDialog = false;
+                });
+              } else {
+                this.$swal("error", response.data.message,"error");
+              }
+            },
+            error: (err) => {
+              this.$store.commit("hidePreloader");
+              this.$swal("error", "An Error Occured On Server. Please try again later.","error");
+            }
+          });
+        }
+      }
+    },
+    onClickRemovePreMeds: function(item) {
+      const index = this.PreMedicines.indexOf(item);
+      this.PreMedicines.splice(index, 1);
+    },
     onClickRemoveNonPreMeds: function(item) {
       const index = this.NonPreMedicines.indexOf(item);
       this.NonPreMedicines.splice(index, 1);
     },
+    onClickAddToPreMeds: function(val) {
+      if (val.AmountToDispense == "" || val.AmountToDispense < 1) {
+        this.$swal("error", "Cannot Dispense the medicine.","error");
+        return false;
+      }
+      const index = this.PreAddMedicinesItems.indexOf(val)
+      let toBeAddedMeds = Object.assign({}, val);
+      this.PreMedicines.push(val);
+      this.PreAddMedicinesItems.splice(index, 1);
+    },
     onClickAddToNonPreMeds: function(val) {
+      if (val.AmountToDispense == "" || val.AmountToDispense < 1) {
+        this.$swal("error", "Cannot Dispense the medicine.","error");
+        return false;
+      }
       const index = this.NonPreAddMedicinesItems.indexOf(val)
       let toBeAddedMeds = Object.assign({}, val);
       this.NonPreMedicines.push(val);
       this.NonPreAddMedicinesItems.splice(index, 1);
+    },
+    onClickAddMedicinePre: function() {
+      this.PreAddMedicinesItems = [];
+      //Run API
+      this.$store.commit("showPreloader");
+      this.Endpoints.getDispenseMedicineStockList({
+        success: (response) => {
+          this.$store.commit("hidePreloader");
+          if (response.data.status == 1) {
+            response.data.data.forEach((med) => {
+              med.Days = 0;
+              med.Intake = 0;
+              med.AmountToDispense = 0;
+            });
+
+            let toDispenseMedicines = this.PreMedicines;
+
+            let filteredList = _.reject(response.data.data, function(returnedData) {
+              let found = _.find(toDispenseMedicines, function(test) {
+                  return Number(returnedData.StockID) == Number(test.StockID)
+              });
+              if (typeof(found) == "undefined") {
+                  return false;
+              }
+              return true;
+            });
+            this.PreAddMedicinesItems = filteredList;
+            this.PrescriptiveMedicineListDialog = true;
+          } else {
+            this.$swal("error", response.data.message,"error");
+          }
+        },
+        error: (err) => {
+          this.$store.commit("hidePreloader");
+          this.$swal("error", "An Error Occured On Server. Please try again later.","error");
+        }
+      });
     },
     onClickAddMedicineNonPre: function() {
       this.NonPreAddMedicinesItems = [];
@@ -511,6 +883,7 @@ export default {
               return true;
             });
             this.NonPreAddMedicinesItems = filteredList;
+            this.NonPrescriptiveMedicineListDialog = true;
             //this.NonPreAddMedicinesItems = response.data.data;
           } else {
             this.$swal("error", response.data.message,"error");
@@ -521,12 +894,13 @@ export default {
           this.$swal("error", "An Error Occured On Server. Please try again later.","error");
         }
       });
-      this.NonPrescriptiveMedicineListDialog = true;
+      
     },
     onClickPreDispense: function(myResident) {
       //TODO
       //Modal 
       this.NonPreMedicines = [];
+      this.PreMedicines = [];
       this.SelectedResident = myResident;
       this.PreDispenseDialog = true;
     },
@@ -607,8 +981,29 @@ export default {
       } else {
         this.currentTab = "tab-1";
         //Fetch Medicines
+        this.getMedicineTransactions();
       }
       this.ViewTransactionsDialog = true;
+    },
+    getMedicineTransactions: function() {
+      this.$store.commit("showPreloader");
+      var self = this;
+      this.Endpoints.getMedicineTransactions({
+        data: self.currentResidentId,
+        success: (response) => {
+          this.$store.commit("hidePreloader");
+          if (response.data.status == 1) {
+            //Add to array
+            this.medicineTransactions.items = response.data.data;
+          } else {
+            this.$swal("Error",response.data.message, "error");
+          }
+        },
+        error: (err) => {
+          this.$store.commit("hidePreloader");
+          this.$swal("Error","An Error Occured On Server. Please try again later.", "error");
+        }
+      });
     },
     getIndigencyTransactions: function() {
       this.$store.commit("showPreloader");
@@ -655,6 +1050,62 @@ export default {
     },
     selectedPurposeOthers: function() {
       return (this.SelectedPurpose != 'Others') ? '' : this.SelectedPurposeOthers == "" ? 'Please Enter a Purpose' : ''
+    },
+    onChangeDaysAndIntake: function(curItem) {
+      curItem.AmountToDispense = (curItem.Intake * curItem.Days) > curItem.Total ? curItem.Total : (curItem.Intake * curItem.Days);
+    },
+    onViewDetailedDispense: function(obj) {
+      
+      if (obj.Prescriptive == "No") {
+        this.viewPrescriptive = false;
+      } else {
+        this.viewPrescriptive = true;
+      }
+      this.$store.commit("showPreloader");
+      this.Endpoints.getDetailedMedicineTransactions({
+        data: obj.ID,
+        success: (model,response) => {
+          this.$store.commit("hidePreloader");
+          console.log(response);
+          if (response.status == 1) {
+            //this.detailedDispense.items = response.data.data;
+            if (response.data.length > 0) {
+              response.data.forEach((element) => {
+                let days = element.Days;
+                let intake = element.Intakes;
+                element.PrescriptionInformation = "";
+                console.log(days);
+                console.log(intake);
+                if (days != null) {
+                  let dayStr = days > 1 ? " days" : " day";
+                  element.PrescriptionInformation = "" + intake + "x a day, for " +  days + dayStr;
+                  //console.log(element.PrescriptionInformation);
+                }
+              });
+              // _.each(response.data.data, function (element) {
+
+              // });
+            }
+            console.log(response.data);
+            this.detailedDispense.items = response.data;
+            this.ViewDetailedDispenseDialog = true;
+          } else {
+            this.$swal("error", response.message,"error");
+          }
+        },
+        error: (err) => {
+          this.$store.commit("hidePreloader");
+          this.$swal("error", "An Error Occured On Server. Please try again later.","error");
+        }
+      });
+      
+    },
+    hideHeader: function(headerText) {
+      if (headerText == "Prescription Information") {
+        //this.viewPrescriptive = false;
+        return this.viewPrescriptive;
+      }
+      return true;
     }
   },
   mounted() {

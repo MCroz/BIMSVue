@@ -484,6 +484,10 @@ export default {
         if (this.OwnerActionType == 'Add') {
           var self = this;
           let newOwnerObject = Object.assign({},this.newOwner);
+          if (newOwnerObject.Image == "") {
+            this.$swal("Error","Please Upload An Image","error");
+            return false;
+          }
           newOwnerObject.CreatedBy = this.$store.state.currentUser.ID;
           newOwnerObject.ModifiedBy = this.$store.state.currentUser.ID;
           this.$store.commit("showPreloader");
@@ -508,6 +512,10 @@ export default {
         } else {
           var self = this;
           let newOwnerObject = Object.assign({},this.newOwner);
+          if (newOwnerObject.Image.trim() == "") {
+            this.$swal("Error","Please Upload An Image","error");
+            return false;
+          }
           newOwnerObject.ModifiedBy = this.$store.state.currentUser.ID;
           this.$store.commit("showPreloader");
           this.Endpoints.updateOwner({

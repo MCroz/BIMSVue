@@ -475,6 +475,10 @@ export default {
           }
           thisResident.Citizenship = this.editResidentOtherCitizenship;
         }
+        if (thisResident.Image == "") {
+          this.$swal("Error","Please Upload An Image","error");
+          return false;
+        }
         delete thisResident['formattedBirthdate']
         this.Endpoints.updateResident({
           data: thisResident,
@@ -509,6 +513,10 @@ export default {
             return false;
           }
           thisResident.Citizenship = this.newResidentOtherCitizenship;
+        }
+        if (thisResident.Image.trim() == "") {
+          this.$swal("Error","Please Upload An Image","error");
+          return false;
         }
         this.$store.commit("showPreloader");
         this.Endpoints.addResident({

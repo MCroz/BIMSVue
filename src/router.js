@@ -48,7 +48,19 @@ export default new Router({
         {
           path: 'blotters',
           component: () => import('./views/Blotters.vue')
-        },     
+        },   
+        {
+          path: 'firsttimelogin',
+          component: () => import('./views/FirstTimeLogin.vue')
+        },    
+        {
+          path: 'profile',
+          component: () => import('./views/Profile.vue')
+        },    
+        {
+          path: 'reports',
+          component: () => import('./views/Reports.vue')
+        },  
       ]
     }
   ]
