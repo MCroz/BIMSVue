@@ -37,8 +37,33 @@
                     </v-list-tile-content>
                   </v-list-tile>
                 </v-flex>
-                <v-flex sm6>
+                <v-flex xs12>
                   <v-checkbox v-model="Prescriptive" label="Prescriptive"></v-checkbox>
+                </v-flex>
+
+                <v-flex sm6 v-if="Prescriptive">
+                  <v-text-field
+                    v-model="DoctorName"
+                    label="Doctor Name" 
+                    :rules="[v => !!v || 'Doctor Name is required',
+                    v => /^[a-z]+$/i.test(v) || 'Alphabets Only'
+                    ]"
+                    required
+                  >
+                  </v-text-field>
+                </v-flex>
+
+                <v-flex sm6 v-if="Prescriptive">
+                  <v-text-field
+                    v-model="DoctorLicenseNo"
+                    label="License No." 
+                    :rules="[v => !!v || 'License No. is required' ,
+                      v => /^[0-9]+$/.test(v) || 'Numbers Only',
+
+                    ]"
+                    required
+                  >
+                  </v-text-field>
                 </v-flex>
 
                 <v-flex xs12 v-if="Prescriptive">
@@ -474,7 +499,8 @@
                       <td>{{ props.item.CreatedBy }}</td>
                       <td>{{ props.item.DateDispensed | formatDate }}</td>
                       <td>{{ props.item.Prescriptive }}</td>
-                      
+                      <td>{{ props.item.DoctorName }}</td>
+                      <td>{{ props.item.DoctorLicenseNo }}</td>
                     </template>
                   </v-data-table>
                 </v-card-text>
@@ -658,7 +684,9 @@ export default {
             { text: 'Action', value: '' },
             { text: 'Dispensed By', value: 'MedicineName' },
             { text: 'Dispensed Date', value: 'Description' },
-            { text: 'Prescriptive', value: 'Prescriptive' }
+            { text: 'Prescriptive', value: 'Prescriptive' },
+            { text: 'Doctor Name', value: 'DoctorName' },
+            { text: 'License No', value: 'DoctorLicenseNo' }
         ],
         items: []
       },
@@ -703,6 +731,8 @@ export default {
         items: []
       },
       viewPrescriptive: false,
+      DoctorName: "",
+      DoctorLicenseNo: ""
     };
   },
   methods: {
@@ -715,45 +745,54 @@ export default {
       };
       if (this.Prescriptive) {
         //Count All Prescriptive Meds
-        if (this.PreMedicines.length < 1) {
-          this.$swal("error", "Please Enter At Least 1 Medicine.","error");
-        } else {
-          //Build Object
-          DispenseObj.Prescriptive = 1;
-          //Loop
-          let imArr = [];
-          this.PreMedicines.forEach((im) => {
-            let imObj = {
-              StockID: im.StockID,
-              Quantity: im.AmountToDispense,
-              Days: im.Days,
-              Intakes: im.Intake,
-            };
-            imArr.push(imObj);
-          });
-          DispenseObj.InventoryMovement = imArr;
-          // RUN API
-          var self = this;
-          this.$store.commit("showPreloader");
-          this.Endpoints.newDispenseTransaction({
-            data: DispenseObj,
-            success: (response) => {
-              this.$store.commit("hidePreloader");
-              if (response.data.status == 1) {
-                this.$swal("Success","Successfully Dispensed", "success").then((value) => {
-                  self.PreDispenseDialog = false;
-                });
+        this.$refs.PreDispenseTransactionForm.validate()
+        let trueCheck = true;
+        let docName = this.DoctorName;
+        let docLic = this.DoctorLicenseNo;
 
-              } else {
-                this.$swal("error", response.data.message,"error");
+        if (docName.trim() != "" && docLic.trim() != "" && /^[0-9]+$/.test(docLic) && /^[a-z]+$/i.test(docName) ) {
+          if (this.PreMedicines.length < 1) {
+            this.$swal("error", "Please Enter At Least 1 Medicine.","error");
+          } else {
+            //Build Object
+            DispenseObj.Prescriptive = 1;
+            //Loop
+            let imArr = [];
+            this.PreMedicines.forEach((im) => {
+              let imObj = {
+                StockID: im.StockID,
+                Quantity: im.AmountToDispense,
+                Days: im.Days,
+                Intakes: im.Intake
+              };
+              imArr.push(imObj);
+            });
+            DispenseObj.InventoryMovement = imArr;
+            DispenseObj.DoctorName = this.DoctorName;
+            DispenseObj.DoctorLicenseNo = this.DoctorLicenseNo;
+            // RUN API
+            var self = this;
+            this.$store.commit("showPreloader");
+            this.Endpoints.newDispenseTransaction({
+              data: DispenseObj,
+              success: (response) => {
+                this.$store.commit("hidePreloader");
+                if (response.data.status == 1) {
+                  this.$swal("Success","Successfully Dispensed", "success").then((value) => {
+                    self.PreDispenseDialog = false;
+                  });
+
+                } else {
+                  this.$swal("error", response.data.message,"error");
+                }
+              },
+              error: (err) => {
+                this.$store.commit("hidePreloader");
+                this.$swal("error", "An Error Occured On Server. Please try again later.","error");
               }
-            },
-            error: (err) => {
-              this.$store.commit("hidePreloader");
-              this.$swal("error", "An Error Occured On Server. Please try again later.","error");
-            }
-          });
+            });
 
+          }
         }
       } else {
         if (this.NonPreMedicines.length < 1) {
@@ -772,6 +811,8 @@ export default {
             imArr.push(imObj);
           });
           DispenseObj.InventoryMovement = imArr;
+          DispenseObj.DoctorName = "";
+          DispenseObj.DoctorLicenseNo = "";
           var self = this;
           this.$store.commit("showPreloader");
           this.Endpoints.newDispenseTransaction({
@@ -899,6 +940,8 @@ export default {
     onClickPreDispense: function(myResident) {
       //TODO
       //Modal 
+      this.DoctorName = "";
+      this.DoctorLicenseNo = "";
       this.NonPreMedicines = [];
       this.PreMedicines = [];
       this.SelectedResident = myResident;
